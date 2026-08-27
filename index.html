@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Hedwig — Family Chat</title>
+<meta name="description" content="Hedwig — a private, secure chat space for family." />
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#FAFAF8" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Tailwind (CDN build). The config object below is Hedwig's design-token bridge into
+     Tailwind's utility classes — kept here because the CDN build requires the config to
+     run before the utility engine boots. Aesthetic *values* live in style.css as CSS
+     variables so both places stay in sync; see the top of style.css for the token list. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FAFAF8',
+          surface: '#FFFFFF',
+          ink: '#2A241C',
+          inksoft: '#8A8175',
+          border: '#ECE7DD',
+          amber: { DEFAULT: '#C9821F', soft: '#FDF1DC', dark: '#9C6716' },
+          skyread: { DEFAULT: '#3B6FE0', soft: '#EAF1FF' },
+        },
+        fontFamily: {
+          display: ['"Fraunces"', 'serif'],
+          sans: ['"Inter"', 'sans-serif'],
+        },
+        borderRadius: {
+          feather: '1.5rem 1.5rem 1.5rem 0.4rem',
+        },
+        boxShadow: {
+          card: '0 1px 2px rgba(42,36,28,0.04), 0 8px 24px -12px rgba(42,36,28,0.10)',
+          pop: '0 10px 30px -10px rgba(201,130,31,0.35)',
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="style.css" />
+
+<!-- Firebase (compat SDKs — simplest to hook up without a bundler on GitHub Pages) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body class="bg-paper text-ink font-sans antialiased">
+
+<div id="app" class="min-h-screen flex flex-col max-w-md mx-auto relative">
+
+  <!-- ============ AUTH VIEW ============ -->
+  <section id="view-auth" class="view flex-1 flex flex-col justify-center px-6 py-10">
+    <div class="flex flex-col items-center mb-10">
+      <div class="w-16 h-16 rounded-2xl bg-amber-soft flex items-center justify-center shadow-card mb-4">
+        <img src="https://api.iconify.design/mdi/owl.svg?color=%23C9821F" class="w-9 h-9" alt="Hedwig owl icon" />
+      </div>
+      <h1 class="font-display text-3xl font-semibold tracking-tight">Hedwig</h1>
+      <p class="text-inksoft text-sm mt-1">A quiet place for the family to talk.</p>
+    </div>
+
+    <div class="bg-surface rounded-2xl shadow-card border border-border p-5">
+      <div class="flex bg-paper rounded-xl p-1 mb-5 border border-border">
+        <button id="tab-login" class="auth-tab flex-1 py-2 rounded-lg text-sm font-semibold transition-all">Log in</button>
+        <button id="tab-register" class="auth-tab flex-1 py-2 rounded-lg text-sm font-semibold transition-all">Register</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="form-login" class="space-y-3">
+        <div>
+          <label class="text-xs font-medium text-inksoft">Username</label>
+          <input id="login-username" type="text" autocomplete="username" required
+            class="input" placeholder="e.g. georgep" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required
+            class="input" placeholder="••••••••" />
+        </div>
+        <p id="login-error" class="text-xs text-red-500 hidden"></p>
+        <button type="submit" class="btn-primary w-full mt-2">Log in</button>
+      </form>
+
+      <!-- Register form -->
+      <form id="form-register" class="space-y-3 hidden">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-medium text-inksoft">First name</label>
+            <input id="reg-name" type="text" required class="input" placeholder="George" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-inksoft">Surname</label>
+            <input id="reg-surname" type="text" required class="input" placeholder="Papas" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Username</label>
+          <input id="reg-username" type="text" required class="input" placeholder="Unique, no spaces" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Avatar URL <span class="text-inksoft/60">(optional)</span></label>
+          <input id="reg-avatar" type="url" class="input" placeholder="https://…" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Password</label>
+          <input id="reg-password" type="password" autocomplete="new-password" required class="input" placeholder="At least 6 characters" />
+        </div>
+        <p id="register-error" class="text-xs text-red-500 hidden"></p>
+        <button type="submit" class="btn-primary w-full mt-2">Create account</button>
+      </form>
+    </div>
+    <p class="text-center text-xs text-inksoft mt-6">Private by design — only people you add can see a chat.</p>
+  </section>
+
+  <!-- ============ CHATS HOME VIEW ============ -->
+  <section id="view-chats" class="view hidden flex-1 flex-col">
+    <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-5 pt-5 pb-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <img src="https://api.iconify.design/mdi/owl.svg?color=%23C9821F" class="w-7 h-7" alt="" />
+        <span class="font-display text-xl font-semibold">Hedwig</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-bell" class="icon-btn relative" aria-label="Notifications">
+          <img src="https://api.iconify.design/mdi/bell-outline.svg?color=%232A241C" class="w-5 h-5" alt="" />
+          <span id="bell-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-skyread ring-2 ring-paper"></span>
+        </button>
+        <div class="relative">
+          <button id="btn-settings" class="icon-btn" aria-label="Settings">
+            <img src="https://api.iconify.design/mdi/cog-outline.svg?color=%232A241C" class="w-5 h-5" alt="" />
+          </button>
+          <div id="settings-menu" class="hidden absolute right-0 mt-2 w-44 bg-surface rounded-xl shadow-card border border-border py-1.5 z-30">
+            <button id="menu-profile" class="menu-item">
+              <img src="https://api.iconify.design/mdi/account-outline.svg?color=%232A241C" class="w-4 h-4" alt="" /> Profile
+            </button>
+            <button id="menu-logout" class="menu-item text-red-500">
+              <img src="https://api.iconify.design/mdi/logout.svg?color=%23ef4444" class="w-4 h-4" alt="" /> Log out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div id="chat-list" class="flex-1 overflow-y-auto px-4 py-4 space-y-2 pb-28">
+      <!-- chat cards injected here -->
+    </div>
+
+    <div id="chats-empty" class="hidden flex-1 flex-col items-center justify-center text-center px-10 py-16">
+      <img src="https://api.iconify.design/mdi/owl.svg?color=%23ECE7DD" class="w-16 h-16 mb-4" alt="" />
+      <p class="font-display text-lg">Nothing here yet</p>
+      <p class="text-sm text-inksoft mt-1">Tap the + button to start a chat with a family member.</p>
+    </div>
+
+    <button id="fab-add" class="fab" aria-label="Start new chat">
+      <img src="https://api.iconify.design/mdi/plus.svg?color=%23FFFFFF" class="w-6 h-6" alt="" />
+    </button>
+  </section>
+
+  <!-- ============ CONTACTS VIEW ============ -->
+  <section id="view-contacts" class="view hidden flex-1 flex-col">
+    <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-5 pt-5 pb-4 flex items-center gap-3">
+      <button id="back-contacts" class="icon-btn"><img src="https://api.iconify.design/mdi/arrow-left.svg?color=%232A241C" class="w-5 h-5" alt="" /></button>
+      <h2 class="font-display text-xl font-semibold">New chat</h2>
+    </header>
+    <div class="px-5 py-4">
+      <div class="relative">
+        <img src="https://api.iconify.design/mdi/magnify.svg?color=%238A8175" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" alt="" />
+        <input id="contact-search" type="text" placeholder="Search by exact username…" class="input pl-9" />
+      </div>
+      <p id="contact-status" class="text-xs text-inksoft mt-3"></p>
+      <div id="contact-result" class="mt-3"></div>
+    </div>
+  </section>
+
+  <!-- ============ CHAT ROOM VIEW ============ -->
+  <section id="view-room" class="view hidden flex-1 flex-col h-screen">
+    <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
+      <button id="back-room" class="icon-btn shrink-0"><img src="https://api.iconify.design/mdi/arrow-left.svg?color=%232A241C" class="w-5 h-5" alt="" /></button>
+      <img id="room-avatar" src="" class="w-9 h-9 rounded-full object-cover border border-border" alt="" />
+      <div class="min-w-0">
+        <p id="room-name" class="font-semibold text-sm truncate"></p>
+        <p id="room-username" class="text-xs text-inksoft truncate"></p>
+      </div>
+    </header>
+
+    <div id="room-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-paper"></div>
+
+    <form id="form-message" class="sticky bottom-0 bg-surface border-t border-border px-3 py-3 flex items-center gap-2">
+      <input id="message-input" type="text" autocomplete="off" placeholder="Message…" class="input flex-1" />
+      <button type="submit" class="send-btn" aria-label="Send">
+        <img src="https://api.iconify.design/mdi/send.svg?color=%23FFFFFF" class="w-4 h-4" alt="" />
+      </button>
+    </form>
+  </section>
+
+  <!-- ============ PROFILE VIEW ============ -->
+  <section id="view-profile" class="view hidden flex-1 flex-col">
+    <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-5 pt-5 pb-4 flex items-center gap-3">
+      <button id="back-profile" class="icon-btn"><img src="https://api.iconify.design/mdi/arrow-left.svg?color=%232A241C" class="w-5 h-5" alt="" /></button>
+      <h2 class="font-display text-xl font-semibold">Your profile</h2>
+    </header>
+    <div class="px-5 py-6">
+      <div class="flex flex-col items-center mb-6">
+        <img id="profile-avatar-preview" src="" class="w-20 h-20 rounded-full object-cover border border-border shadow-card mb-3" alt="" />
+        <p id="profile-username-label" class="text-sm text-inksoft"></p>
+      </div>
+      <form id="form-profile" class="space-y-3 bg-surface rounded-2xl border border-border shadow-card p-5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-medium text-inksoft">First name</label>
+            <input id="profile-name" type="text" required class="input" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-inksoft">Surname</label>
+            <input id="profile-surname" type="text" required class="input" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Avatar URL</label>
+          <input id="profile-avatar" type="url" class="input" placeholder="https://…" />
+        </div>
+        <p id="profile-status" class="text-xs text-amber-dark hidden"></p>
+        <button type="submit" class="btn-primary w-full mt-2">Save changes</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-ink text-white text-sm px-4 py-2.5 rounded-full shadow-pop z-50"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+/* ============================================================
+   Hedwig — design tokens
+   These mirror the values passed into tailwind.config in index.html
+   (Tailwind CDN requires that config to be inline JS, so this file
+   is the single source of truth for the *aesthetic* — every raw
+   hex below is duplicated only in index.html's tailwind.config).
+   ============================================================ */
+:root {
+  --paper: #FAFAF8;
+  --surface: #FFFFFF;
+  --ink: #2A241C;
+  --ink-soft: #8A8175;
+  --border: #ECE7DD;
+  --amber: #C9821F;
+  --amber-soft: #FDF1DC;
+  --amber-dark: #9C6716;
+  --skyread: #3B6FE0;
+  --skyread-soft: #EAF1FF;
+  --radius-feather: 1.5rem 1.5rem 1.5rem 0.4rem;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--paper);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* ---------- Views ---------- */
+.view {
+  min-height: 100vh;
+  min-height: 100dvh;
+  animation: view-in 220ms ease both;
+}
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Inputs ---------- */
+.input {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.875rem;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+.input::placeholder { color: #B4AC9E; }
+.input:focus {
+  background: var(--surface);
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(201, 130, 31, 0.14);
+}
+.input:focus-visible { outline: 2px solid transparent; }
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-feather);
+  transition: transform 120ms ease, background 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 1px 2px rgba(42,36,28,0.08);
+}
+.btn-primary:hover { background: #16130E; box-shadow: 0 6px 16px -6px rgba(42,36,28,0.35); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+.auth-tab { color: var(--ink-soft); }
+.auth-tab.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(42,36,28,0.08); }
+
+.icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: transform 120ms ease, background 150ms ease;
+}
+.icon-btn:hover { background: var(--amber-soft); }
+.icon-btn:active { transform: scale(0.94); }
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition: background 120ms ease;
+  text-align: left;
+}
+.menu-item:hover { background: var(--paper); }
+
+.send-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--amber);
+  border-radius: var(--radius-feather);
+  transition: transform 120ms ease, background 150ms ease;
+}
+.send-btn:hover { background: var(--amber-dark); }
+.send-btn:active { transform: scale(0.92); }
+
+/* Floating action button — the "feather" radius is Hedwig's one signature shape */
+.fab {
+  position: fixed;
+  bottom: 1.75rem;
+  right: 1.25rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--amber);
+  border-radius: var(--radius-feather);
+  box-shadow: 0 10px 30px -8px rgba(201,130,31,0.45);
+  transition: transform 150ms cubic-bezier(.34,1.56,.64,1), background 150ms ease;
+  z-index: 30;
+}
+.fab:hover { background: var(--amber-dark); transform: translateY(-2px); }
+.fab:active { transform: scale(0.92); }
+
+/* ---------- Chat list cards ---------- */
+.chat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.1rem;
+  padding: 0.8rem 0.9rem;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+.chat-card:hover {
+  box-shadow: 0 8px 24px -14px rgba(42,36,28,0.25);
+  border-color: #E4DCC9;
+  transform: translateY(-1px);
+}
+.chat-card:active { transform: scale(0.985); }
+
+.unread-badge {
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--skyread-soft);
+  color: var(--skyread);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid #D6E4FE;
+}
+
+/* ---------- Chat bubbles ---------- */
+.bubble-row { display: flex; align-items: flex-end; gap: 0.5rem; max-width: 85%; }
+.bubble-row.mine { margin-left: auto; flex-direction: row-reverse; }
+
+.bubble {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-radius: 1.1rem;
+  word-break: break-word;
+}
+.bubble-row.mine .bubble {
+  background: var(--ink);
+  color: #fff;
+  border-bottom-right-radius: 0.35rem;
+}
+.bubble-row.theirs .bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 0.35rem;
+}
+
+.bubble-time {
+  font-size: 0.625rem;
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+}
+
+/* ---------- Link preview card ---------- */
+.link-preview {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: var(--surface);
+  max-width: 260px;
+  text-decoration: none;
+  transition: transform 120ms ease, box-shadow 150ms ease;
+}
+.link-preview:hover { box-shadow: 0 8px 20px -12px rgba(42,36,28,0.3); transform: translateY(-1px); }
+.link-preview img { width: 100%; height: 120px; object-fit: cover; display: block; background: var(--paper); }
+.link-preview .lp-body { padding: 0.55rem 0.7rem; }
+.link-preview .lp-title { font-size: 0.75rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.link-preview .lp-domain { font-size: 0.6875rem; color: var(--ink-soft); margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.02em; }
+
+/* Simple fade/scale-in used for dropdowns/menus */
+.pop-in { animation: pop-in 140ms ease both; transform-origin: top right; }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.95) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
