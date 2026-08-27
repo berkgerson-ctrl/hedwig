@@ -23,7 +23,7 @@ const firebaseConfig = {
   measurementId: "G-D125ML4NM4"
 };
 
-firebase.initializeApp(FIREBASE_CONFIG);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
 
