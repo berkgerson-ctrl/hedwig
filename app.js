@@ -25,16 +25,15 @@
 // Firebase Console → Project settings → General → Your apps → Web app
 // ------------------------------------------------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyDgPLFZn7F70dT0FNrpYRB03kGkXgpLol0",
-  authDomain: "hedwig-11987.firebaseapp.com",
-  databaseURL: "https://hedwig-11987-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "hedwig-11987",
-  storageBucket: "hedwig-11987.firebasestorage.app",
-  messagingSenderId: "472147538639",
-  appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
-  measurementId: "G-D125ML4NM4"
-};
-
+    apiKey: "AIzaSyDgPLFZn7F70dT0FNrpYRB03kGkXgpLol0",
+    authDomain: "hedwig-11987.firebaseapp.com",
+    databaseURL: "https://hedwig-11987-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "hedwig-11987",
+    storageBucket: "hedwig-11987.firebasestorage.app",
+    messagingSenderId: "472147538639",
+    appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
+    measurementId: "G-D125ML4NM4"
+  };
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
