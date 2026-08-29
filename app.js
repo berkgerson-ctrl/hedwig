@@ -24,13 +24,15 @@
 // 🔧 PLACEHOLDER — replace with your own Firebase project config.
 // Firebase Console → Project settings → General → Your apps → Web app
 // ------------------------------------------------------------------
-const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+const firebaseConfig = {
+  apiKey: "AIzaSyDgPLFZn7F70dT0FNrpYRB03kGkXgpLol0",
+  authDomain: "hedwig-11987.firebaseapp.com",
+  databaseURL: "https://hedwig-11987-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "hedwig-11987",
+  storageBucket: "hedwig-11987.firebasestorage.app",
+  messagingSenderId: "472147538639",
+  appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
+  measurementId: "G-D125ML4NM4"
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
