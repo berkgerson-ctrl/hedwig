@@ -37,6 +37,24 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Tapping a system notification focuses (or opens) the app and tells it
+// which chat to jump to.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const data = event.notification.data || {};
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.postMessage({ type: "open-chat", chatId: data.chatId, username: data.username });
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./index.html");
+    })
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);

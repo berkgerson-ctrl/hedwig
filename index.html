@@ -13,6 +13,23 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
 
+<!-- Hedwig owl mark, inlined once and reused via <use> so it can be recolored
+     with currentColor wherever it appears (header, splash, empty state, etc). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="hedwig-owl" viewBox="66.2 52.7 42.6 42.6">
+    <path d="M93.98,76.3c-1.11,0-2.23-.37-3.13-1.11l-.27-.22c-2.97-2.43-5.11-4.19-5.49-7.07,0-4.96,3.96-8.92,8.82-8.92s8.83,3.96,8.83,8.83v.14c-.58,3.02-2.53,4.77-5.66,7.28-.9.72-2,1.08-3.1,1.08h0ZM93.91,60.47c-4.04,0-7.33,3.29-7.33,7.33.29,2.2,2.14,3.72,4.94,6.01l.27.22c1.25,1.03,3.08,1.04,4.34.02,3.1-2.49,4.62-3.94,5.1-6.32-.04-4.01-3.31-7.26-7.33-7.26h.01ZM101.99,67.8h0Z"/>
+    <path d="M94.66,70.36h-1.5v-.75c0-3.77-3.12-8.15-7.15-8.15h-.75v-1.5h.75c4.95,0,8.65,5.09,8.65,9.65v.75Z"/>
+    <path d="M94.66,70.36h-1.5v-.75c0-4.55,3.7-9.65,8.65-9.65h.75v1.5h-.75c-4.02,0-7.15,4.38-7.15,8.15v.75Z"/>
+    <path d="M89.96,69.86c-1.13,0-2.05-.92-2.05-2.05s.92-2.05,2.05-2.05,2.05.92,2.05,2.05-.92,2.05-2.05,2.05ZM89.96,67.26c-.3,0-.55.25-.55.55s.25.55.55.55.55-.25.55-.55-.25-.55-.55-.55Z"/>
+    <path d="M97.86,69.86c-1.13,0-2.05-.92-2.05-2.05s.92-2.05,2.05-2.05,2.05.92,2.05,2.05-.92,2.05-2.05,2.05ZM97.86,67.27c-.3,0-.55.25-.55.55s.25.55.55.55.55-.25.55-.55-.25-.55-.55-.55Z"/>
+    <path d="M90.09,88.73l-1.16-.96.09-.1c.08-.09.15-.18.22-.28.83-1.16,1.27-2.53,1.27-3.96,0-3.34-2.4-6.17-5.7-6.72-.84-.14-1.48-.13-2.29,0l-.26-1.48c.99-.17,1.79-.18,2.8,0,4.03.67,6.95,4.11,6.95,8.2,0,1.74-.54,3.41-1.55,4.83-.09.13-.19.25-.29.37l-.08.09h0Z"/>
+    <path d="M92.48,89.01h-19.7l-.52-1.29c1.11-1.05,2.25-2.26,3.39-3.6,2.08-2.44,4.13-5.31,6.1-8.51,1.11-2.49,2.58-4.76,4.33-6.67l1.11,1.01c-1.64,1.8-3.02,3.93-4.11,6.35l-.1.17c-1.95,3.19-4.05,6.12-6.18,8.62-.73.86-1.47,1.67-2.19,2.42h17.88c4.25,0,7.71-3.46,7.71-7.71v-9.38h1.5v9.38c0,5.08-4.13,9.21-9.21,9.21h0Z"/>
+    <rect x="76.27" y="84.95" width="6.36" height="1.5" transform="translate(-36.69 98.65) rotate(-53.53)"/>
+    <rect x="80.25" y="84.95" width="6.36" height="1.5" transform="translate(-35.08 101.85) rotate(-53.53)"/>
+    <rect x="84.24" y="84.95" width="6.36" height="1.5" transform="translate(-33.45 105.1) rotate(-53.55)"/>
+  </symbol>
+</svg>
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,7 +84,7 @@
   <section id="view-auth" class="view flex-1 flex flex-col justify-center px-6 py-10">
     <div class="flex flex-col items-center mb-10">
       <div class="w-16 h-16 rounded-2xl bg-amber-soft flex items-center justify-center shadow-card mb-4">
-        <img src="https://api.iconify.design/mdi/owl.svg?color=%23C9821F" class="w-9 h-9" alt="Hedwig owl icon" />
+        <svg class="w-9 h-9 text-amber" aria-label="Hedwig owl icon"><use href="#hedwig-owl"></use></svg>
       </div>
       <h1 class="font-display text-3xl font-semibold tracking-tight">Hedwig</h1>
       <p class="text-inksoft text-sm mt-1">A quiet place for the family to talk.</p>
@@ -130,19 +147,25 @@
   <section id="view-chats" class="view hidden flex-1 flex-col">
     <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-5 pt-5 pb-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <img src="https://api.iconify.design/mdi/owl.svg?color=%23C9821F" class="w-7 h-7" alt="" />
+        <svg class="w-7 h-7 text-amber" aria-hidden="true"><use href="#hedwig-owl"></use></svg>
         <span class="font-display text-xl font-semibold">Hedwig</span>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btn-bell" class="icon-btn relative" aria-label="Notifications">
-          <img src="https://api.iconify.design/mdi/bell-outline.svg?color=%232A241C" class="w-5 h-5" alt="" />
-          <span id="bell-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-skyread ring-2 ring-paper"></span>
-        </button>
+        <div class="relative">
+          <button id="btn-bell" class="icon-btn relative" aria-label="Notifications">
+            <img src="https://api.iconify.design/mdi/bell-outline.svg?color=%232A241C" class="w-5 h-5" alt="" />
+            <span id="bell-dot" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-skyread ring-2 ring-paper"></span>
+          </button>
+          <div id="notif-menu" class="hidden pop-in absolute right-0 mt-2 w-72 max-w-[80vw] bg-surface rounded-xl shadow-card border border-border py-2 z-30 max-h-80 overflow-y-auto">
+            <p id="notif-heading" class="px-3 pb-1.5 text-xs font-semibold text-inksoft uppercase tracking-wide">Notifications</p>
+            <div id="notif-list"></div>
+          </div>
+        </div>
         <div class="relative">
           <button id="btn-settings" class="icon-btn" aria-label="Settings">
             <img src="https://api.iconify.design/mdi/cog-outline.svg?color=%232A241C" class="w-5 h-5" alt="" />
           </button>
-          <div id="settings-menu" class="hidden absolute right-0 mt-2 w-44 bg-surface rounded-xl shadow-card border border-border py-1.5 z-30">
+          <div id="settings-menu" class="hidden pop-in absolute right-0 mt-2 w-44 bg-surface rounded-xl shadow-card border border-border py-1.5 z-30">
             <button id="menu-profile" class="menu-item">
               <img src="https://api.iconify.design/mdi/account-outline.svg?color=%232A241C" class="w-4 h-4" alt="" /> Profile
             </button>
@@ -154,12 +177,21 @@
       </div>
     </header>
 
+    <div id="notif-banner" class="hidden mx-4 mt-4 bg-amber-soft border border-amber/30 rounded-xl px-4 py-3 flex items-center gap-3">
+      <svg class="w-5 h-5 text-amber-dark shrink-0"><use href="#hedwig-owl"></use></svg>
+      <p class="text-xs text-ink flex-1">Turn on notifications so you don't miss new messages.</p>
+      <button id="notif-enable" class="text-xs font-semibold text-amber-dark shrink-0">Enable</button>
+      <button id="notif-dismiss" class="icon-btn w-6 h-6 shrink-0" aria-label="Dismiss">
+        <img src="https://api.iconify.design/mdi/close.svg?color=%238A8175" class="w-3 h-3" alt="" />
+      </button>
+    </div>
+
     <div id="chat-list" class="flex-1 overflow-y-auto px-4 py-4 space-y-2 pb-28">
       <!-- chat cards injected here -->
     </div>
 
     <div id="chats-empty" class="hidden flex-1 flex-col items-center justify-center text-center px-10 py-16">
-      <img src="https://api.iconify.design/mdi/owl.svg?color=%23ECE7DD" class="w-16 h-16 mb-4" alt="" />
+      <svg class="w-16 h-16 mb-4 text-border" aria-hidden="true"><use href="#hedwig-owl"></use></svg>
       <p class="font-display text-lg">Nothing here yet</p>
       <p class="text-sm text-inksoft mt-1">Tap the + button to start a chat with a family member.</p>
     </div>
@@ -178,7 +210,7 @@
     <div class="px-5 py-4">
       <div class="relative">
         <img src="https://api.iconify.design/mdi/magnify.svg?color=%238A8175" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" alt="" />
-        <input id="contact-search" type="text" placeholder="Search by exact username…" class="input pl-9" />
+        <input id="contact-search" type="text" placeholder="Search by username, name or surname…" class="input pl-9" />
       </div>
       <p id="contact-status" class="text-xs text-inksoft mt-3"></p>
       <div id="contact-result" class="mt-3"></div>
@@ -189,11 +221,13 @@
   <section id="view-room" class="view hidden flex-1 flex-col h-screen">
     <header class="sticky top-0 z-20 bg-paper/90 backdrop-blur border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
       <button id="back-room" class="icon-btn shrink-0"><img src="https://api.iconify.design/mdi/arrow-left.svg?color=%232A241C" class="w-5 h-5" alt="" /></button>
-      <img id="room-avatar" src="" class="w-9 h-9 rounded-full object-cover border border-border" alt="" />
-      <div class="min-w-0">
-        <p id="room-name" class="font-semibold text-sm truncate"></p>
-        <p id="room-username" class="text-xs text-inksoft truncate"></p>
-      </div>
+      <button id="room-identity" class="flex items-center gap-3 min-w-0 flex-1 text-left">
+        <img id="room-avatar" src="" class="w-9 h-9 rounded-full object-cover border border-border shrink-0" alt="" />
+        <div class="min-w-0">
+          <p id="room-name" class="font-semibold text-sm truncate"></p>
+          <p id="room-username" class="text-xs text-inksoft truncate"></p>
+        </div>
+      </button>
     </header>
 
     <div id="room-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-paper"></div>
@@ -237,6 +271,45 @@
       </form>
     </div>
   </section>
+
+  <!-- ============ MESSAGE ACTION MENU (long-press on a bubble) ============ -->
+  <div id="message-menu" class="hidden fixed z-50 bg-surface rounded-xl shadow-card border border-border py-1.5 w-52 pop-in">
+    <button id="msg-toggle-read" class="menu-item">
+      <img id="msg-toggle-read-icon" src="https://api.iconify.design/mdi/email-mark-as-unread-outline.svg?color=%232A241C" class="w-4 h-4" alt="" />
+      <span id="msg-toggle-read-label">Mark as unread</span>
+    </button>
+    <button id="msg-edit" class="menu-item">
+      <img src="https://api.iconify.design/mdi/pencil-outline.svg?color=%232A241C" class="w-4 h-4" alt="" /> Edit
+    </button>
+    <button id="msg-delete" class="menu-item text-red-500">
+      <img src="https://api.iconify.design/mdi/trash-can-outline.svg?color=%23ef4444" class="w-4 h-4" alt="" /> Delete for everyone
+    </button>
+  </div>
+  <div id="message-menu-backdrop" class="hidden fixed inset-0 z-40"></div>
+
+  <!-- ============ GENERIC CONFIRM MODAL ============ -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div id="confirm-backdrop" class="absolute inset-0 bg-ink/30"></div>
+    <div class="relative bg-surface w-full sm:w-80 sm:rounded-2xl rounded-t-2xl border border-border shadow-card p-5 pop-in">
+      <p id="confirm-title" class="font-display text-lg font-semibold mb-1"></p>
+      <p id="confirm-body" class="text-sm text-inksoft mb-4"></p>
+      <div class="flex gap-2">
+        <button id="confirm-cancel" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-paper border border-border">Cancel</button>
+        <button id="confirm-ok" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FRIEND PROFILE PEEK MODAL ============ -->
+  <div id="friend-profile-modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div id="friend-profile-backdrop" class="absolute inset-0 bg-ink/30"></div>
+    <div class="relative bg-surface w-full sm:w-80 sm:rounded-2xl rounded-t-2xl border border-border shadow-card p-6 pop-in text-center">
+      <img id="friend-profile-avatar" src="" class="w-20 h-20 rounded-full object-cover border border-border shadow-card mx-auto mb-3" alt="" />
+      <p id="friend-profile-name" class="font-display text-lg font-semibold"></p>
+      <p id="friend-profile-username" class="text-sm text-inksoft mt-0.5"></p>
+      <button id="friend-profile-close" class="btn-primary w-full mt-5">Close</button>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-ink text-white text-sm px-4 py-2.5 rounded-full shadow-pop z-50"></div>

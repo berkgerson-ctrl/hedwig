@@ -228,3 +228,64 @@ html, body {
 /* Simple fade/scale-in used for dropdowns/menus */
 .pop-in { animation: pop-in 140ms ease both; transform-origin: top right; }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.95) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* ---------- Long-press affordance ---------- */
+.chat-card.pressing, .bubble-row.pressing .bubble {
+  transform: scale(0.97);
+  transition: transform 160ms ease;
+}
+.bubble-row .bubble { transition: transform 160ms ease, opacity 160ms ease; cursor: pointer; }
+.bubble-row.pressing .bubble { opacity: 0.85; }
+
+/* ---------- Read/unread ticks on my own messages ---------- */
+.msg-ticks { display: inline-flex; align-items: center; gap: 1px; margin-left: 0.25rem; vertical-align: -1px; }
+.msg-ticks.unread img { opacity: 0.45; }
+
+/* ---------- Edited label ---------- */
+.msg-edited { font-size: 0.625rem; color: var(--ink-soft); font-style: italic; margin-left: 0.3rem; }
+
+/* ---------- Inline message edit mode ---------- */
+.bubble-edit-wrap { display: flex; align-items: center; gap: 0.4rem; }
+.bubble-edit-input {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--amber);
+  outline: none;
+  min-width: 160px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.bubble-edit-btn {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.bubble-edit-btn:active { transform: scale(0.9); }
+.bubble-edit-btn.save { background: var(--amber); }
+.bubble-edit-btn.cancel { background: var(--border); }
+
+/* ---------- Notification dropdown list ---------- */
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  text-align: left;
+  transition: background 120ms ease;
+}
+.notif-item:hover { background: var(--paper); }
+.notif-item .notif-avatar { width: 2rem; height: 2rem; border-radius: 999px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+.notif-item .notif-name { font-size: 0.8125rem; font-weight: 700; color: var(--ink); }
+.notif-item .notif-text { font-size: 0.75rem; color: var(--ink-soft); }
+.notif-empty { padding: 1.25rem 0.9rem; text-align: center; font-size: 0.8125rem; color: var(--ink-soft); }
+
+/* ---------- Modal fade backdrop ---------- */
+#confirm-backdrop, #friend-profile-backdrop, #message-menu-backdrop { animation: fade-in 140ms ease both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
