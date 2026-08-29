@@ -34,7 +34,7 @@ const firebaseConfig = {
     appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
     measurementId: "G-D125ML4NM4"
   };
-firebase.initializeApp(FIREBASE_CONFIG);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
 
