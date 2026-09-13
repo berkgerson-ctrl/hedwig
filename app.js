@@ -24,17 +24,16 @@
 // 🔧 PLACEHOLDER — replace with your own Firebase project config.
 // Firebase Console → Project settings → General → Your apps → Web app
 // ------------------------------------------------------------------
-const firebaseConfig = {
-    apiKey: "AIzaSyDgPLFZn7F70dT0FNrpYRB03kGkXgpLol0",
-    authDomain: "hedwig-11987.firebaseapp.com",
-    databaseURL: "https://hedwig-11987-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "hedwig-11987",
-    storageBucket: "hedwig-11987.firebasestorage.app",
-    messagingSenderId: "472147538639",
-    appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
-    measurementId: "G-D125ML4NM4"
-  };
-firebase.initializeApp(firebaseConfig);
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
 
@@ -76,6 +75,12 @@ async function hashPassword(password) {
   const enc = new TextEncoder().encode(password);
   const buf = await crypto.subtle.digest("SHA-256", enc);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Security-question answers are hashed the same way, but normalized first
+// (trimmed + lowercased) so "Fluffy" and "fluffy" both verify correctly.
+async function hashAnswer(answer) {
+  return hashPassword(answer.trim().toLowerCase());
 }
 
 // ------------------------------------------------------------------
@@ -197,6 +202,9 @@ window.addEventListener("DOMContentLoaded", () => {
   wireContacts();
   wireRoom();
   wireProfile();
+  wireChangePassword();
+  wireSecurityQuestionForm();
+  wireForgotPassword();
   wireMessageMenu();
   wireFriendProfileModal();
   wireNotifications();
@@ -208,6 +216,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (doc.exists) {
         currentUser = { username: doc.id, ...doc.data() };
         delete currentUser.passwordHash;
+        delete currentUser.securityAnswerHash;
         saveSession(currentUser);
         enterApp();
       } else {
@@ -247,6 +256,12 @@ function wireAuthForm() {
   tabRegister.addEventListener("click", () => setTab("register"));
   setTab("login");
 
+  // "Write my own question…" reveals a free-text field, in both the
+  // register form and (later) the profile's recovery-question form.
+  bindCustomQuestionToggle("reg-security-question", "reg-security-question-custom");
+
+  document.getElementById("link-forgot-password").addEventListener("click", () => openForgotPassword());
+
   formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
     const errEl = document.getElementById("login-error");
@@ -282,6 +297,11 @@ function wireAuthForm() {
     const username = document.getElementById("reg-username").value.trim().toLowerCase().replace(/\s+/g, "");
     const avatarUrl = document.getElementById("reg-avatar").value.trim();
     const password = document.getElementById("reg-password").value;
+    const questionSelect = document.getElementById("reg-security-question").value;
+    const question = questionSelect === "custom"
+      ? document.getElementById("reg-security-question-custom").value.trim()
+      : questionSelect;
+    const answer = document.getElementById("reg-security-answer").value.trim();
 
     if (!name || !surname || !username || !password) return;
     if (password.length < 6) {
@@ -294,6 +314,11 @@ function wireAuthForm() {
       errEl.classList.remove("hidden");
       return;
     }
+    if (!question || !answer) {
+      errEl.textContent = "Pick a recovery question and give it an answer — this is how you'll reset your password later.";
+      errEl.classList.remove("hidden");
+      return;
+    }
 
     try {
       const ref = db.collection("users").doc(username);
@@ -301,11 +326,14 @@ function wireAuthForm() {
       if (existing.exists) throw new Error("That username is already taken.");
 
       const passwordHash = await hashPassword(password);
+      const securityAnswerHash = await hashAnswer(answer);
       const fallbackAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(username)}`;
       const profile = {
         name, surname,
         avatarUrl: avatarUrl || fallbackAvatar,
         passwordHash,
+        securityQuestion: question,
+        securityAnswerHash,
         createdAt: FieldValue.serverTimestamp(),
       };
       await ref.set(profile);
@@ -896,13 +924,229 @@ function wireProfile() {
   });
 }
 
-function openProfile() {
+async function openProfile() {
   document.getElementById("profile-name").value = currentUser.name || "";
   document.getElementById("profile-surname").value = currentUser.surname || "";
   document.getElementById("profile-avatar").value = currentUser.avatarUrl || "";
   document.getElementById("profile-avatar-preview").src = currentUser.avatarUrl || "";
   document.getElementById("profile-username-label").textContent = "@" + currentUser.username;
+
+  document.getElementById("profile-current-password").value = "";
+  document.getElementById("profile-new-password").value = "";
+  document.getElementById("change-password-status").classList.add("hidden");
+  document.getElementById("profile-security-answer").value = "";
+  document.getElementById("security-question-status").classList.add("hidden");
+
   navigateTo("profile");
+
+  // Pre-fill the recovery-question dropdown with whatever's already saved,
+  // fetched fresh so we're not relying on a stale in-memory copy.
+  try {
+    const doc = await db.collection("users").doc(currentUser.username).get();
+    const data = doc.data() || {};
+    const select = document.getElementById("profile-security-question");
+    const customInput = document.getElementById("profile-security-question-custom");
+    const isPreset = Array.from(select.options).some(o => o.value !== "custom" && o.textContent === data.securityQuestion);
+
+    if (isPreset) {
+      select.value = data.securityQuestion;
+      customInput.classList.add("hidden");
+    } else if (data.securityQuestion) {
+      select.value = "custom";
+      customInput.value = data.securityQuestion;
+      customInput.classList.remove("hidden");
+    } else {
+      select.value = "";
+      customInput.value = "";
+      customInput.classList.add("hidden");
+    }
+  } catch { /* non-critical — form just starts empty */ }
+}
+
+// Shows/hides the free-text field when "Write my own question…" is picked.
+// Shared by the register form and the profile's recovery-question form.
+function bindCustomQuestionToggle(selectId, customInputId) {
+  const select = document.getElementById(selectId);
+  const custom = document.getElementById(customInputId);
+  select.addEventListener("change", () => {
+    custom.classList.toggle("hidden", select.value !== "custom");
+  });
+}
+
+// ------------------------------------------------------------------
+// Change password (requires the current password, from inside the app)
+// ------------------------------------------------------------------
+function wireChangePassword() {
+  document.getElementById("form-change-password").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("change-password-status");
+    const setStatus = (msg, ok) => {
+      statusEl.textContent = msg;
+      statusEl.classList.remove("hidden", "text-red-500", "text-amber-dark");
+      statusEl.classList.add(ok ? "text-amber-dark" : "text-red-500");
+    };
+
+    const current = document.getElementById("profile-current-password").value;
+    const next = document.getElementById("profile-new-password").value;
+    if (!current || !next) { setStatus("Fill in both fields to change your password.", false); return; }
+    if (next.length < 6) { setStatus("New password must be at least 6 characters.", false); return; }
+
+    try {
+      const doc = await db.collection("users").doc(currentUser.username).get();
+      const currentHash = await hashPassword(current);
+      if (currentHash !== doc.data().passwordHash) { setStatus("Current password is incorrect.", false); return; }
+
+      const newHash = await hashPassword(next);
+      await db.collection("users").doc(currentUser.username).update({ passwordHash: newHash });
+      document.getElementById("form-change-password").reset();
+      setStatus("Password updated.", true);
+      toast("Password updated");
+    } catch {
+      setStatus("Couldn't update your password right now.", false);
+    }
+  });
+}
+
+// ------------------------------------------------------------------
+// Recovery (security) question — editable any time from the profile,
+// so an account created before this feature (or with a forgotten
+// answer) can still get one set up.
+// ------------------------------------------------------------------
+function wireSecurityQuestionForm() {
+  bindCustomQuestionToggle("profile-security-question", "profile-security-question-custom");
+
+  document.getElementById("form-security-question").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("security-question-status");
+    const setStatus = (msg, ok) => {
+      statusEl.textContent = msg;
+      statusEl.classList.remove("hidden", "text-red-500", "text-amber-dark");
+      statusEl.classList.add(ok ? "text-amber-dark" : "text-red-500");
+    };
+
+    const select = document.getElementById("profile-security-question").value;
+    const question = select === "custom"
+      ? document.getElementById("profile-security-question-custom").value.trim()
+      : select;
+    const answer = document.getElementById("profile-security-answer").value.trim();
+
+    if (!question) { setStatus("Choose a question first.", false); return; }
+
+    try {
+      const doc = await db.collection("users").doc(currentUser.username).get();
+      const hadAnswerAlready = !!doc.data().securityAnswerHash;
+      if (!answer && !hadAnswerAlready) {
+        setStatus("Please also give an answer — this account doesn't have one saved yet.", false);
+        return;
+      }
+
+      const update = { securityQuestion: question };
+      if (answer) update.securityAnswerHash = await hashAnswer(answer);
+      await db.collection("users").doc(currentUser.username).update(update);
+
+      document.getElementById("profile-security-answer").value = "";
+      setStatus("Recovery question saved.", true);
+      toast("Recovery question saved");
+    } catch {
+      setStatus("Couldn't save right now.", false);
+    }
+  });
+}
+
+// ============================================================
+// FORGOT PASSWORD (security-question recovery, from the login screen)
+// ============================================================
+let fpUsername = null;
+let fpAnswerHash = null;
+
+function wireForgotPassword() {
+  document.getElementById("forgot-password-close").addEventListener("click", closeForgotPassword);
+  document.getElementById("forgot-password-backdrop").addEventListener("click", closeForgotPassword);
+  document.getElementById("fp-done-close").addEventListener("click", closeForgotPassword);
+
+  document.getElementById("fp-username-next").addEventListener("click", async () => {
+    const errEl = document.getElementById("fp-username-error");
+    errEl.classList.add("hidden");
+    const username = document.getElementById("fp-username").value.trim().toLowerCase();
+    if (!username) return;
+
+    try {
+      const doc = await db.collection("users").doc(username).get();
+      if (!doc.exists) throw new Error("No account with that username.");
+      const data = doc.data();
+      if (!data.securityQuestion || !data.securityAnswerHash) {
+        throw new Error("This account has no recovery question set up. Ask a family member with Firebase Console access to reset it for you.");
+      }
+      fpUsername = username;
+      fpAnswerHash = data.securityAnswerHash;
+      document.getElementById("fp-question-text").textContent = data.securityQuestion;
+      document.getElementById("fp-answer").value = "";
+      document.getElementById("fp-answer-error").classList.add("hidden");
+      showFpStep("question");
+    } catch (err) {
+      errEl.textContent = err.message || "Couldn't look that up right now.";
+      errEl.classList.remove("hidden");
+    }
+  });
+
+  document.getElementById("fp-answer-next").addEventListener("click", async () => {
+    const errEl = document.getElementById("fp-answer-error");
+    errEl.classList.add("hidden");
+    const answer = document.getElementById("fp-answer").value.trim();
+    if (!answer) return;
+
+    const hash = await hashAnswer(answer);
+    if (hash !== fpAnswerHash) {
+      errEl.textContent = "That's not quite right — try again.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    document.getElementById("fp-newpass").value = "";
+    document.getElementById("fp-newpass-error").classList.add("hidden");
+    showFpStep("newpass");
+  });
+
+  document.getElementById("fp-newpass-submit").addEventListener("click", async () => {
+    const errEl = document.getElementById("fp-newpass-error");
+    errEl.classList.add("hidden");
+    const newPassword = document.getElementById("fp-newpass").value;
+    if (newPassword.length < 6) {
+      errEl.textContent = "Password must be at least 6 characters.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    try {
+      const newHash = await hashPassword(newPassword);
+      await db.collection("users").doc(fpUsername).update({ passwordHash: newHash });
+      showFpStep("done");
+    } catch {
+      errEl.textContent = "Couldn't update the password right now.";
+      errEl.classList.remove("hidden");
+    }
+  });
+}
+
+function showFpStep(step) {
+  ["username", "question", "newpass", "done"].forEach(s => {
+    document.getElementById(`fp-step-${s}`).classList.toggle("hidden", s !== step);
+  });
+}
+
+function openForgotPassword() {
+  fpUsername = null;
+  fpAnswerHash = null;
+  document.getElementById("fp-username").value = document.getElementById("login-username").value || "";
+  document.getElementById("fp-username-error").classList.add("hidden");
+  showFpStep("username");
+  document.getElementById("forgot-password-modal").classList.remove("hidden");
+}
+
+function closeForgotPassword() {
+  document.getElementById("forgot-password-modal").classList.add("hidden");
+  if (fpUsername) {
+    // Prefill the login form so they can go straight into logging in.
+    document.getElementById("login-username").value = fpUsername;
+  }
 }
 
 // ============================================================

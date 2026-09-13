@@ -108,6 +108,7 @@
           <input id="login-password" type="password" autocomplete="current-password" required
             class="input" placeholder="••••••••" />
         </div>
+        <button type="button" id="link-forgot-password" class="text-xs font-semibold text-amber-dark block ml-auto">Forgot password?</button>
         <p id="login-error" class="text-xs text-red-500 hidden"></p>
         <button type="submit" class="btn-primary w-full mt-2">Log in</button>
       </form>
@@ -135,6 +136,22 @@
         <div>
           <label class="text-xs font-medium text-inksoft">Password</label>
           <input id="reg-password" type="password" autocomplete="new-password" required class="input" placeholder="At least 6 characters" />
+        </div>
+        <div class="pt-2 border-t border-border">
+          <label class="text-xs font-medium text-inksoft">Security question <span class="text-inksoft/60">(for password recovery)</span></label>
+          <select id="reg-security-question" required class="input">
+            <option value="">Choose a question…</option>
+            <option>What was your childhood nickname?</option>
+            <option>What street did you grow up on?</option>
+            <option>What was the name of your first pet?</option>
+            <option>What's your favorite family recipe?</option>
+            <option value="custom">Write my own question…</option>
+          </select>
+          <input id="reg-security-question-custom" type="text" class="input mt-2 hidden" placeholder="Type your own question" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Answer</label>
+          <input id="reg-security-answer" type="text" required class="input" placeholder="Only you should know this" />
         </div>
         <p id="register-error" class="text-xs text-red-500 hidden"></p>
         <button type="submit" class="btn-primary w-full mt-2">Create account</button>
@@ -269,6 +286,43 @@
         <p id="profile-status" class="text-xs text-amber-dark hidden"></p>
         <button type="submit" class="btn-primary w-full mt-2">Save changes</button>
       </form>
+
+      <form id="form-change-password" class="space-y-3 bg-surface rounded-2xl border border-border shadow-card p-5 mt-4">
+        <p class="text-xs font-semibold text-inksoft uppercase tracking-wide">Change password</p>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Current password</label>
+          <input id="profile-current-password" type="password" autocomplete="current-password" class="input" placeholder="••••••••" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">New password</label>
+          <input id="profile-new-password" type="password" autocomplete="new-password" class="input" placeholder="At least 6 characters" />
+        </div>
+        <p id="change-password-status" class="text-xs hidden"></p>
+        <button type="submit" class="btn-primary w-full mt-2">Update password</button>
+      </form>
+
+      <form id="form-security-question" class="space-y-3 bg-surface rounded-2xl border border-border shadow-card p-5 mt-4">
+        <p class="text-xs font-semibold text-inksoft uppercase tracking-wide">Recovery question</p>
+        <p class="text-xs text-inksoft -mt-1">Used to reset your password if you ever forget it.</p>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Question</label>
+          <select id="profile-security-question" class="input">
+            <option value="">Choose a question…</option>
+            <option>What was your childhood nickname?</option>
+            <option>What street did you grow up on?</option>
+            <option>What was the name of your first pet?</option>
+            <option>What's your favorite family recipe?</option>
+            <option value="custom">Write my own question…</option>
+          </select>
+          <input id="profile-security-question-custom" type="text" class="input mt-2 hidden" placeholder="Type your own question" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-inksoft">Answer</label>
+          <input id="profile-security-answer" type="text" class="input" placeholder="Leave blank to keep your current answer" />
+        </div>
+        <p id="security-question-status" class="text-xs hidden"></p>
+        <button type="submit" class="btn-primary w-full mt-2">Save recovery question</button>
+      </form>
     </div>
   </section>
 
@@ -308,6 +362,52 @@
       <p id="friend-profile-name" class="font-display text-lg font-semibold"></p>
       <p id="friend-profile-username" class="text-sm text-inksoft mt-0.5"></p>
       <button id="friend-profile-close" class="btn-primary w-full mt-5">Close</button>
+    </div>
+  </div>
+
+  <!-- ============ FORGOT PASSWORD MODAL ============ -->
+  <div id="forgot-password-modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div id="forgot-password-backdrop" class="absolute inset-0 bg-ink/30"></div>
+    <div class="relative bg-surface w-full sm:w-80 sm:rounded-2xl rounded-t-2xl border border-border shadow-card p-6 pop-in">
+      <div class="flex items-center justify-between mb-4">
+        <p class="font-display text-lg font-semibold">Reset password</p>
+        <button id="forgot-password-close" class="icon-btn w-7 h-7" aria-label="Close">
+          <img src="https://api.iconify.design/mdi/close.svg?color=%232A241C" class="w-3.5 h-3.5" alt="" />
+        </button>
+      </div>
+
+      <!-- Step 1: identify the account -->
+      <div id="fp-step-username">
+        <label class="text-xs font-medium text-inksoft">Username</label>
+        <input id="fp-username" type="text" class="input" placeholder="e.g. georgep" />
+        <p id="fp-username-error" class="text-xs text-red-500 mt-2 hidden"></p>
+        <button id="fp-username-next" class="btn-primary w-full mt-4">Continue</button>
+      </div>
+
+      <!-- Step 2: answer the security question -->
+      <div id="fp-step-question" class="hidden">
+        <p class="text-xs font-medium text-inksoft mb-1">Security question</p>
+        <p id="fp-question-text" class="text-sm font-semibold mb-3"></p>
+        <label class="text-xs font-medium text-inksoft">Your answer</label>
+        <input id="fp-answer" type="text" class="input" placeholder="Answer" />
+        <p id="fp-answer-error" class="text-xs text-red-500 mt-2 hidden"></p>
+        <button id="fp-answer-next" class="btn-primary w-full mt-4">Verify</button>
+      </div>
+
+      <!-- Step 3: set a new password -->
+      <div id="fp-step-newpass" class="hidden">
+        <label class="text-xs font-medium text-inksoft">New password</label>
+        <input id="fp-newpass" type="password" autocomplete="new-password" class="input" placeholder="At least 6 characters" />
+        <p id="fp-newpass-error" class="text-xs text-red-500 mt-2 hidden"></p>
+        <button id="fp-newpass-submit" class="btn-primary w-full mt-4">Set new password</button>
+      </div>
+
+      <!-- Step 4: done -->
+      <div id="fp-step-done" class="hidden text-center">
+        <img src="https://api.iconify.design/mdi/check-circle-outline.svg?color=%23C9821F" class="w-10 h-10 mx-auto mb-2" alt="" />
+        <p class="text-sm text-ink">Password updated. You can log in now.</p>
+        <button id="fp-done-close" class="btn-primary w-full mt-4">Close</button>
+      </div>
     </div>
   </div>
 
