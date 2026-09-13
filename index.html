@@ -90,6 +90,11 @@
       <p class="text-inksoft text-sm mt-1">A quiet place for the family to talk.</p>
     </div>
 
+    <div id="config-warning" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3 mb-4">
+      <p class="font-semibold mb-0.5">Firebase isn't configured yet</p>
+      <p>app.js still has placeholder values in FIREBASE_CONFIG, so no login can succeed. Replace them with your real project's config, then reload.</p>
+    </div>
+
     <div class="bg-surface rounded-2xl shadow-card border border-border p-5">
       <div class="flex bg-paper rounded-xl p-1 mb-5 border border-border">
         <button id="tab-login" class="auth-tab flex-1 py-2 rounded-lg text-sm font-semibold transition-all">Log in</button>

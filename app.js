@@ -24,18 +24,42 @@
 // 🔧 PLACEHOLDER — replace with your own Firebase project config.
 // Firebase Console → Project settings → General → Your apps → Web app
 // ------------------------------------------------------------------
-const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDgPLFZn7F70dT0FNrpYRB03kGkXgpLol0",
+  authDomain: "hedwig-11987.firebaseapp.com",
+  databaseURL: "https://hedwig-11987-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "hedwig-11987",
+  storageBucket: "hedwig-11987.firebasestorage.app",
+  messagingSenderId: "472147538639",
+  appId: "1:472147538639:web:91d280ae95d7f0e3b43dba",
+  measurementId: "G-D125ML4NM4"
 };
 
-firebase.initializeApp(FIREBASE_CONFIG);
+firebase.initializeApp(firebase_config);
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
+
+// Many "Failed to get document because the client is offline" errors are
+// NOT actually about internet access — Firestore's default transport tries
+// a WebChannel/streaming connection first, and that gets silently blocked
+// by some corporate networks, VPNs, antivirus "web shields", and browser
+// privacy extensions. Auto-detecting and falling back to plain long-polling
+// fixes the large majority of these cases with no downside for a small app.
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+
+// If the placeholder config was never replaced, every Firestore call will
+// fail exactly like a connectivity problem — surface that clearly instead
+// of leaving people to debug a cryptic "client is offline" message.
+const FIREBASE_NOT_CONFIGURED = Object.values(FIREBASE_CONFIG).some(v => String(v).startsWith("YOUR_"));
+if (FIREBASE_NOT_CONFIGURED) {
+  console.error(
+    "Hedwig: FIREBASE_CONFIG in app.js still has placeholder values. " +
+    "Replace them with your real Firebase project config (Firebase Console → " +
+    "Project settings → General → Your apps → Web app) — until then every " +
+    "Firestore request will fail, often showing as 'client is offline'."
+  );
+}
 
 // ------------------------------------------------------------------
 // Session (localStorage) — keeps the user logged in on their phone
@@ -81,6 +105,22 @@ async function hashPassword(password) {
 // (trimmed + lowercased) so "Fluffy" and "fluffy" both verify correctly.
 async function hashAnswer(answer) {
   return hashPassword(answer.trim().toLowerCase());
+}
+
+// Firestore's "client is offline" message is technically accurate but not
+// actionable for most people — it almost always means the SDK never reached
+// Firebase's servers at all (bad config, no Firestore database created yet,
+// or a network/extension blocking the connection), not a real internet
+// outage. Swap in guidance that matches what's actually usually wrong.
+function friendlyFirestoreError(err, fallback) {
+  if (FIREBASE_NOT_CONFIGURED) {
+    return "Firebase isn't configured yet — see the notice above.";
+  }
+  const msg = (err && err.message) || "";
+  if (/offline|unavailable/i.test(msg) || err?.code === "unavailable") {
+    return "Can't reach the server. Check that a Firestore database exists for this project, and that no ad blocker / VPN / firewall is blocking Google's servers, then try again.";
+  }
+  return msg || fallback;
 }
 
 // ------------------------------------------------------------------
@@ -197,6 +237,10 @@ function bindLongPress(el, onLongPress, onClick) {
 // BOOT
 // ============================================================
 window.addEventListener("DOMContentLoaded", () => {
+  if (FIREBASE_NOT_CONFIGURED) {
+    document.getElementById("config-warning").classList.remove("hidden");
+  }
+
   wireAuthForm();
   wireChatsHome();
   wireContacts();
@@ -282,7 +326,7 @@ function wireAuthForm() {
       formLogin.reset();
       enterApp();
     } catch (err) {
-      errEl.textContent = err.message || "Couldn't log in.";
+      errEl.textContent = friendlyFirestoreError(err, "Couldn't log in.");
       errEl.classList.remove("hidden");
     }
   });
@@ -343,7 +387,7 @@ function wireAuthForm() {
       formRegister.reset();
       enterApp();
     } catch (err) {
-      errEl.textContent = err.message || "Couldn't create that account.";
+      errEl.textContent = friendlyFirestoreError(err, "Couldn't create that account.");
       errEl.classList.remove("hidden");
     }
   });
@@ -1084,7 +1128,7 @@ function wireForgotPassword() {
       document.getElementById("fp-answer-error").classList.add("hidden");
       showFpStep("question");
     } catch (err) {
-      errEl.textContent = err.message || "Couldn't look that up right now.";
+      errEl.textContent = friendlyFirestoreError(err, "Couldn't look that up right now.");
       errEl.classList.remove("hidden");
     }
   });
