@@ -51,7 +51,7 @@ db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 // If the placeholder config was never replaced, every Firestore call will
 // fail exactly like a connectivity problem — surface that clearly instead
 // of leaving people to debug a cryptic "client is offline" message.
-const FIREBASE_NOT_CONFIGURED = Object.values(FIREBASE_CONFIG).some(v => String(v).startsWith("YOUR_"));
+const FIREBASE_NOT_CONFIGURED = Object.values(firebaseConfig).some(v => String(v).startsWith("YOUR_"));
 if (FIREBASE_NOT_CONFIGURED) {
   console.error(
     "Hedwig: FIREBASE_CONFIG in app.js still has placeholder values. " +
